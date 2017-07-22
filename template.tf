@@ -49,6 +49,7 @@ resource "ibm_compute_vm_instance" "domaincontroller" {
   count = "${var.domaincontroller_count}"
   hostname = "${var.dc_hostname}"
   domain = "${var.domain}"
+  image_id = "${data.ibm_compute_image_template.base_template.id}"
   datacenter = "${var.datacenter}"
   cores = 4
   memory = 4096
@@ -57,7 +58,6 @@ resource "ibm_compute_vm_instance" "domaincontroller" {
   private_network_only = false,
   hourly_billing = true,
   tags = ["schematics","domaincontroller"]
-  os_reference_code = "WIN_2012-STD_64"
   user_metadata = <<EOF
     #ps1_sysnative
     script: |
