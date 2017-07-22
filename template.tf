@@ -58,7 +58,6 @@ resource "ibm_compute_vm_instance" "domaincontroller" {
   private_network_only = false,
   hourly_billing = true,
   tags = ["schematics","domaincontroller"]
-  os_reference_code = "Microsoft Windows 2012 FULL DC 64 bit 2012 FULL DC x64"
   user_metadata = <<EOF
     #ps1_sysnative
     script: |
