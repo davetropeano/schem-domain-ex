@@ -1,17 +1,37 @@
 variable softlayer_username {}
 variable softlayer_api_key {}
-variable base_template_image {}
-variable computenode_template_image {}
-variable datacenter {}
-variable domain {}
-variable domain_username {}
+
+variable base_template_image {
+  default = "win2k12-r2-ci-base"
+}
+variable computenode_template_image {
+  default = "computenode-r2-1"
+}
+variable datacenter {
+  default = "dal12"
+}
+variable domain {
+  default = "dctest.local"
+}
+variable domain_username {
+  default = "computeruser"
+}
 variable domain_password {}
-variable dc_hostname {}
-variable cn_hostname {}
-variable domaincontroller_count {}
-variable computenode_count {}
-variable domaincontroller_script_url {}
-variable status_controller_url {}
+variable dc_hostname {
+  default = "dc-test"
+}
+variable cn_hostname {
+  default = "cn-test"
+}
+variable domaincontroller_count {
+  default = "1"
+}
+variable computenode_count {
+  default = "0"
+}
+variable domaincontroller_script_url {
+  default = "http://s3-api.dal-us-geo.objectstorage.service.networklayer.com"
+}
 
 provider "ibm" {
   softlayer_username = "${var.softlayer_username}"
@@ -35,16 +55,16 @@ resource "ibm_compute_vm_instance" "domaincontroller" {
   memory = 4096
   network_speed = 1000
   local_disk = false
-  private_network_only = true,
+  private_network_only = false,
   hourly_billing = true,
-  tags = ["schematics","domaincontroller","${terraform.env}","${env.Name}"]
+  tags = ["schematics","domaincontroller"]
   user_metadata = <<EOF
     #ps1_sysnative
     script: |
     <powershell>
     New-Item c:\installs -type directory
     invoke-webrequest '${var.domaincontroller_script_url}' -outfile 'c:\installs\create-domain-controller.ps1'
-    c:\installs\create-domain-controller.ps1 -domain ${var.domain} -username ${var.domain_username} -password ${var.domain_password} -step 1 -statusurl ${var.status_controller_url}
+    c:\installs\create-domain-controller.ps1 -domain ${var.domain} -username ${var.domain_username} -password ${var.domain_password} -step 1
     </powershell>
     EOF
 }
@@ -78,8 +98,6 @@ resource "ibm_compute_vm_instance" "computenodes" {
     Sleep -Seconds 5
     Add-Computer -DomainName "${var.domain}" -Credential $cred
     Sleep -Seconds 5
-    $statusurl = status_controller_url + "/pending"
-    Invoke-WebRequest $statusurl
     Stop-Transcript
     Restart-Computer
     </powershell>
