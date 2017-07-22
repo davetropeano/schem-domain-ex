@@ -20,6 +20,8 @@ variable domain_password {}
 variable dc_hostname {
   default = "dc-test"
 }
+variable dc_image_id {}
+
 variable cn_hostname {
   default = "cn-test"
 }
@@ -49,7 +51,7 @@ resource "ibm_compute_vm_instance" "domaincontroller" {
   count = "${var.domaincontroller_count}"
   hostname = "${var.dc_hostname}"
   domain = "${var.domain}"
-  image_id = "${data.ibm_compute_image_template.base_template.id}"
+  image_id = "${var.dc_image_id}"
   datacenter = "${var.datacenter}"
   cores = 4
   memory = 4096
